@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-6">
+      <h1>Login</h1>
+
+      {% if not user.is_authenticated %}
+        <form method="POST">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            {{ form|crispy }}
+            <div class="mt-4">
+              <button class="btn btn-primary" type="submit">Log in</button>
+            </div>
+          </fieldset>
+        </form>
+      {% else %}
+        <div>
+          <h2>You are logged in</h2>
+        </div>
+        <a class="btn btn-primary" href="{% url 'home' %}">home page</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

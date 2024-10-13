@@ -1,0 +1,29 @@
+{% extends 'base-logged.html' %}
+
+{% block content %}
+  <div class="col-6 pb-3">
+    <h1>Your habits</h1>
+  </div>
+  <div class="col-6 pb-3 d-flex flex-row justify-content-end align-items-center">
+    <span style="padding-inline-end: 10px;">Filter your habits:</span>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">Open filter manager</button>
+  </div>
+  {% for habit in habits %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ habit.description }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Date created: {{ habit.date_created }}</h6>
+
+          <!-- TODO: edit standard bootstrap card to fit habit information -->
+          <a href="#" class="card-link">Card link</a>
+          <a href="#" class="card-link">Another link</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  {% if habits|length == 0 %}
+    <div class="col-md-6">The list of habits is empty</div>
+  {% endif %}
+  {% include 'partials/filter-modal.html' %}
+{% endblock %}

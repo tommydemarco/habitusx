@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">HabitusX</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        {% if not user.is_authenticated %}
+          <li class="nav-item">
+            <a href="#" class="nav-link px-2 text-body-secondary">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link px-2 text-body-secondary">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'add-new-habit' %}">Add new habit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Habits on track</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Habits still to check off</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
