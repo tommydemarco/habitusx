@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.utils import timezone
 from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
 from datetime import timedelta
-from .models import Habit
+from .models import Habit, CheckOff
+from django.views import View
+from django.http import HttpResponseRedirect
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 
 class HabitsListView(LoginRequiredMixin, ListView):
@@ -16,6 +20,13 @@ class HabitsListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Habit.objects.filter(user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            for habit in context['habits']:
+                latest_checkoff = habit.checkoffs.order_by('-date_added').first()
+                habit.latest_checkoff = latest_checkoff 
+            return context
+
 class FilteredHabitListView(LoginRequiredMixin, ListView):
     model = Habit
     template_name = "habit-list.html"
@@ -24,6 +35,9 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         today = timezone.now().date()
         yesterday = today - timedelta(days=1)
+        day_before_yesterday = yesterday - timedelta(days=1)
+        last_week = timezone.now().date() - timedelta(days=7)
+
         checked_off_status = self.kwargs.get("checkedoffstatus")
         occurrence = self.kwargs.get("occurrence")
 
@@ -33,21 +47,23 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
 
         if occurrence == "daily": 
             habits_checked = daily_habits.filter(
-                checkoffs__date_added=today, 
+                Q(checkoffs__date_added__gt=today),
             ).distinct()
             habits_unchecked = daily_habits.filter(
-                checkoffs__date_added=yesterday, 
+                (Q(date_created__date=today) & Q(checkoffs__isnull=True)) |
+                Q(checkoffs__date_added__lt=day_before_yesterday)
             ).distinct()
             habits_broken = daily_habits.filter(
-                checkoffs__date_added__gt=yesterday, 
+                checkoffs__date_added__lt=yesterday, 
             ).distinct()
             habits_any_status = daily_habits
         elif occurrence == "weekly":
             habits_checked = weekly_habits.filter(
-                checkoffs__date_added__range=(today - timedelta(days=7), today), 
+                checkoffs__date_added__range=(last_week, today), 
             ).distinct()
             habits_unchecked = weekly_habits.filter(
-                checkoffs__date_added__range=(today - timedelta(days=14), today - timedelta(days=7)), 
+                Q(date_created__gte=last_week) |
+                Q(checkoffs__date_added__range=(today - timedelta(days=14), today - timedelta(days=7))), 
             ).distinct()
             habits_broken = weekly_habits.filter(
                 checkoffs__date_added__lt= today - timedelta(days=14), 
@@ -68,10 +84,16 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
 
         if checked_off_status == "checked": return habits_checked
         elif checked_off_status == "unchecked": return habits_unchecked
-        elif checked_off_status == "broken": return habits_broken
+        elif checked_off_status == "streak-broken": return habits_broken
         elif checked_off_status == "any-status": return habits_any_status
         else: raise Http404(checked_off_status)
 
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            for habit in context['habits']:
+                latest_checkoff = habit.checkoffs.order_by('-date_added').first()
+                habit.latest_checkoff = latest_checkoff 
+            return context
 
 
 class HabitCreateView(LoginRequiredMixin, CreateView):
@@ -87,3 +109,28 @@ class HabitCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Nice! You created a new habit')
         return super().form_valid(form)
     
+class HabitDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        habit = get_object_or_404(Habit, pk=pk)
+        
+        if habit.user == request.user:
+            habit.delete()
+
+        messages.success(self.request, 'The habit was successfully deleted')
+        return redirect('/') 
+    
+class CheckoffCreateView(LoginRequiredMixin, View):
+   def post(self, request, pk):
+        habit = get_object_or_404(Habit, pk=pk)
+
+        if not habit:
+            messages.error(self.request, 'There was an error in checking off the habit. PLease try again')
+            return redirect('/') 
+        
+        CheckOff.objects.create(
+            habit=habit,
+            date_added=timezone.now()
+        )
+
+        messages.error(self.request, 'The habit was checked off successfully')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

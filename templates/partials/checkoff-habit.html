@@ -1,0 +1,7 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <span>Status: <i>pending checkoff</i></span>
+  <form method="POST" action="{% url 'checkoff-habit' habit.pk %}">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Checkoff</button>
+  </form>
+</div>

@@ -5,25 +5,87 @@
     <h1>Your habits</h1>
   </div>
   <div class="col-6 pb-3 d-flex flex-row justify-content-end align-items-center">
-    <span style="padding-inline-end: 10px;">Filter your habits:</span>
+    <span id="active-filters" style="padding-inline-end: 10px;">Active filters:</span>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">Open filter manager</button>
   </div>
-  {% for habit in habits %}
-    <div class="col-md-6 col-lg-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ habit.description }}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Date created: {{ habit.date_created }}</h6>
+  {% with yesterday=today|date:'Y-m-d' %}
+    {% for habit in habits %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card" style="height: 100%">
+          <div class="card-body" style="display: flex; flex-direction: column;">
+            <h4 class="card-title">{{ habit.description }}</h4>
+            <h6 class="card-subtitle mb-3 text-muted">Created on {{ habit.date_created }}</h6>
+            <p class="card-text">
+              Occurrence: <span class="badge bg-secondary">{{ habit.occurrence.description }}</span>
+            </p>
 
-          <!-- TODO: edit standard bootstrap card to fit habit information -->
-          <a href="#" class="card-link">Card link</a>
-          <a href="#" class="card-link">Another link</a>
+            {% if habit.occurrence.daily_rate == 1 %}
+              {% if habit.latest_checkoff %}
+                {% if habit.latest_checkoff.date_added|date:'Y-m-d' == today %}
+                  CHECKED!
+                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' >= yesterday %}
+                  TO BE CHECKED
+                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' < yesterday %}
+                  STREAK BROKEN
+                {% endif %}
+              {% else %}
+                {% if habit.date_created|date:'Y-m-d' == today %}
+                  TO BE CHECKED{% include 'partials/checkoff-habit.html' %}
+                {% else %}
+                  STREAK BROKEN
+                {% endif %}
+              {% endif %}
+            {% endif %}
+
+            <hr style="margin-top: auto;" />
+            <div class="d-flex justify-content-end align-items-center">
+              <form method="POST" action="{% url 'delete-habit' habit.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-secondary" type="submit">Delete habit</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  {% endfor %}
+    {% endfor %}
+  {% endwith %}
   {% if habits|length == 0 %}
     <div class="col-md-6">The list of habits is empty</div>
   {% endif %}
   {% include 'partials/filter-modal.html' %}
+
+  <script>
+    const filtersElement = document.getElementById('active-filters')
+    const pathElements = window.location.pathname.split('/')
+    
+    const occurrenceElement = pathElements[2]
+    const statusElement = pathElements[3]
+    
+    if (occurrenceElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                              <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                            `
+      )
+    }
+    
+    if (statusElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                           <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                            `
+      )
+    }
+    
+    if (!occurrenceElement && !statusElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                           <span>none</span>
+                                                                                                                                                                                                                                                                                                                                                                                            `
+      )
+    }
+  </script>
 {% endblock %}

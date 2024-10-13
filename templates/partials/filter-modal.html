@@ -23,19 +23,19 @@
         <h6>Habit completion status</h6>
         <div class="form-check">
           <input class="form-check-input" value="any-status" type="radio" name="completion" id="any-status" />
-          <label class="form-check-label" for="any-status">Any completion status</label>
+          <label class="form-check-label" for="any-status">Any status</label>
         </div>
         <div class="form-check">
           <input class="form-check-input" value="checked" type="radio" name="completion" id="checked" />
-          <label class="form-check-label" for="checked">Checked off</label>
+          <label class="form-check-label" for="checked">Checked</label>
         </div>
         <div class="form-check">
           <input class="form-check-input" value="unchecked" type="radio" name="completion" id="unchecked" />
-          <label class="form-check-label" for="unchecked">To be checked off</label>
+          <label class="form-check-label" for="unchecked">Unchecked</label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" value="broken" type="radio" name="completion" id="broken" />
-          <label class="form-check-label" for="broken">Streak broken</label>
+          <input class="form-check-input" value="streak-broken" type="radio" name="completion" id="streak-broken" />
+          <label class="form-check-label" for="streak-broken">Streak broken</label>
         </div>
       </div>
       <div class="modal-footer">
@@ -53,21 +53,18 @@
     function setCheckboxValues() {
         const pathElements = window.location.pathname.split('/');
         
-        if (pathElements.length >= 3) {
-            const secondElement = pathElements[2];
-            const thirdElement = pathElements[3];
-            
-            const firstCheckboxSet = document.querySelectorAll('input[name="occurrence"]');
-            firstCheckboxSet.forEach(checkbox => {
-                console.log(checkbox.value, secondElement)
-                checkbox.checked = (checkbox.value === secondElement);
-            });
-    
-            const secondCheckboxSet = document.querySelectorAll('input[name="completion"]');
-            secondCheckboxSet.forEach(checkbox => {
-                checkbox.checked = (checkbox.value === thirdElement);
-            });
-        }
+        const occurrenceElement = pathElements[2] || "any-occurrence";
+        const ststusElement = pathElements[3] || "any-status";
+        
+        const firstCheckboxSet = document.querySelectorAll('input[name="occurrence"]');
+        firstCheckboxSet.forEach(checkbox => {
+            checkbox.checked = (checkbox.value === occurrenceElement);
+        });
+
+        const secondCheckboxSet = document.querySelectorAll('input[name="completion"]');
+        secondCheckboxSet.forEach(checkbox => {
+            checkbox.checked = (checkbox.value === ststusElement);
+        });
     }
 
     function navigateBasedOnCheckboxes() {
@@ -76,8 +73,6 @@
         
         const occurrence = occurrenceValue?.value || "any-occurrence";
         const completion = completionValue?.value || "any-status";
-
-        console.log(occurrence, completion);
         
         const filterPath = `filter/${occurrence}/${completion}/`;
         window.location.pathname = filterPath;
@@ -88,7 +83,6 @@
     });
 
     applyFiltersButton.addEventListener('click', function () {
-        console.log("CLICK")
         navigateBasedOnCheckboxes();
     });
 </script>

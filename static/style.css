@@ -8,3 +8,9 @@
         flex: 1;
     }
 }
+
+.footer-logout-button {
+    background: transparent;
+    outline: none;
+    border: 0;
+}
