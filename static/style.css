@@ -1,5 +1,4 @@
 .main-container {
-    /* display: none; */
     display: flex !important;
     flex-direction: column;
     min-height: 100vh;
@@ -13,4 +12,9 @@
     background: transparent;
     outline: none;
     border: 0;
+}
+
+.badge {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
 }

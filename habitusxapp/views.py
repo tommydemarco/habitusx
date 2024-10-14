@@ -22,6 +22,11 @@ class HabitsListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
+            today = timezone.now().date()
+            monday = today - timedelta(days=today.weekday())
+            two_mondays_ago = today - timedelta(days=today.weekday() + 7)
+            context["monday"] = monday
+            context["two_mondays_ago"] = two_mondays_ago
             for habit in context['habits']:
                 latest_checkoff = habit.checkoffs.order_by('-date_added').first()
                 habit.latest_checkoff = latest_checkoff 
@@ -36,14 +41,15 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
         today = timezone.now().date()
         yesterday = today - timedelta(days=1)
         day_before_yesterday = yesterday - timedelta(days=1)
-        last_week = timezone.now().date() - timedelta(days=7)
+
+        monday = today - timedelta(days=today.weekday())
+        two_mondays_ago = today - timedelta(days=today.weekday() + 7)
 
         checked_off_status = self.kwargs.get("checkedoffstatus")
         occurrence = self.kwargs.get("occurrence")
 
         daily_habits = Habit.objects.filter(occurrence__daily_rate=1, user=self.request.user)
         weekly_habits = Habit.objects.filter(occurrence__daily_rate=7, user=self.request.user)
-        any_occurrence_habits = Habit.objects.filter(user=self.request.user)
 
         if occurrence == "daily": 
             habits_checked = daily_habits.filter(
@@ -59,27 +65,35 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
             habits_any_status = daily_habits
         elif occurrence == "weekly":
             habits_checked = weekly_habits.filter(
-                checkoffs__date_added__range=(last_week, today), 
+                checkoffs__date_added__range=(monday, today), 
             ).distinct()
             habits_unchecked = weekly_habits.filter(
-                Q(date_created__gte=last_week) |
-                Q(checkoffs__date_added__range=(today - timedelta(days=14), today - timedelta(days=7))), 
+                ((Q(date_created__date__gte=monday) & Q(checkoffs__isnull=True))) |
+                (Q(checkoffs__date_added__lte=two_mondays_ago) & ~Q(checkoffs__date_added__range=(monday, today)))
             ).distinct()
             habits_broken = weekly_habits.filter(
-                checkoffs__date_added__lt= today - timedelta(days=14), 
+                Q(checkoffs__date_added__lt=monday)
             ).distinct()
             habits_any_status = weekly_habits
         elif occurrence == "any-occurrence": 
-            habits_checked = any_occurrence_habits.filter(
-                checkoffs__date_added__range=(today - timedelta(days=7), today)
+            habits_checked = daily_habits.filter(
+                Q(checkoffs__date_added__gt=today),
+            ).distinct() | weekly_habits.filter(
+                checkoffs__date_added__range=(monday, today), 
             ).distinct()
-            habits_unchecked = any_occurrence_habits.filter(
-                checkoffs__date_added__range=(today - timedelta(days=14), today - timedelta(days=7))
+            habits_unchecked = daily_habits.filter(
+                (Q(date_created__date=today) & Q(checkoffs__isnull=True)) |
+                Q(checkoffs__date_added__lt=day_before_yesterday)
+            ).distinct() | weekly_habits.filter(
+                ((Q(date_created__date__gte=monday) & Q(checkoffs__isnull=True))) |
+                (Q(checkoffs__date_added__lte=two_mondays_ago) & ~Q(checkoffs__date_added__range=(monday, today)))
             ).distinct()
-            habits_broken = any_occurrence_habits.filter(
-                checkoffs__date_added__lt= today - timedelta(days=14)
+            habits_broken = daily_habits.filter(
+                checkoffs__date_added__lt=yesterday, 
+            ).distinct() | weekly_habits.filter(
+                Q(checkoffs__date_added__lt=monday)
             ).distinct()
-            habits_any_status = any_occurrence_habits
+            habits_any_status = daily_habits | weekly_habits
         else: raise Http404('Occurrence 404')
 
         if checked_off_status == "checked": return habits_checked
@@ -90,6 +104,11 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
+            today = timezone.now().date()
+            monday = today - timedelta(days=today.weekday())
+            two_mondays_ago = today - timedelta(days=today.weekday() + 7)
+            context["monday"] = monday
+            context["two_mondays_ago"] = two_mondays_ago
             for habit in context['habits']:
                 latest_checkoff = habit.checkoffs.order_by('-date_added').first()
                 habit.latest_checkoff = latest_checkoff 

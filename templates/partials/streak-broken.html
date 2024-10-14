@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between align-items-top my-3">
-  <span>Status: <span class="badge bg-light text-dark">pending checkoff</span></span>
+  <span>Status: <span class="badge bg-danger">streak broken</span></span>
   <form method="POST" action="{% url 'checkoff-habit' habit.pk %}">
     {% csrf_token %}
     <button class="btn btn-light" type="submit">&#10004; Checkoff</button>

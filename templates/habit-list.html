@@ -10,39 +10,59 @@
   </div>
   {% with yesterday=today|date:'Y-m-d' %}
     {% for habit in habits %}
-      <div class="col-md-6 col-lg-4">
+      <div class="col-md-6 col-lg-4 mb-4">
         <div class="card" style="height: 100%">
           <div class="card-body" style="display: flex; flex-direction: column;">
             <h4 class="card-title">{{ habit.description }}</h4>
-            <h6 class="card-subtitle mb-3 text-muted">Created on {{ habit.date_created }}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">Created on {{ habit.date_created }}</h6>
             <p class="card-text">
-              Occurrence: <span class="badge bg-secondary">{{ habit.occurrence.description }}</span>
+              Occurrence: <i>{{ habit.occurrence.description }}</i>
             </p>
-
+            <hr style="margin-top: 0;" />
+            <!-- daily conditions -->
             {% if habit.occurrence.daily_rate == 1 %}
               {% if habit.latest_checkoff %}
                 {% if habit.latest_checkoff.date_added|date:'Y-m-d' == today %}
-                  CHECKED!
-                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' >= yesterday %}
-                  TO BE CHECKED
-                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' < yesterday %}
-                  STREAK BROKEN
+                  {% include 'partials/habit-checked.html' %}
+                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' == yesterday %}
+                  {% include 'partials/checkoff-habit.html' %}
+                {% else %}
+                  {% include 'partials/streak-broken.html' %}
                 {% endif %}
               {% else %}
                 {% if habit.date_created|date:'Y-m-d' == today %}
-                  TO BE CHECKED{% include 'partials/checkoff-habit.html' %}
+                  {% include 'partials/checkoff-habit.html' %}
                 {% else %}
-                  STREAK BROKEN
+                  {% include 'partials/streak-broken.html' %}
                 {% endif %}
               {% endif %}
             {% endif %}
-
-            <hr style="margin-top: auto;" />
-            <div class="d-flex justify-content-end align-items-center">
-              <form method="POST" action="{% url 'delete-habit' habit.pk %}">
-                {% csrf_token %}
-                <button class="btn btn-secondary" type="submit">Delete habit</button>
-              </form>
+            <!-- weekly conditions -->
+            {% if habit.occurrence.daily_rate == 7 %}
+              {% if habit.latest_checkoff %}
+                {% if habit.latest_checkoff.date_added|date:'Y-m-d' >= monday|date:'Y-m-d' %}
+                  {% include 'partials/habit-checked.html' %}
+                {% elif habit.latest_checkoff.date_added|date:'Y-m-d' >= last_monday %}
+                  {% include 'partials/checkoff-habit.html' %}
+                {% else %}
+                  {% include 'partials/streak-broken.html' %}
+                {% endif %}
+              {% else %}
+                {% if habit.date_created|date:'Y-m-d' >= monday|date:'Y-m-d' %}
+                  {% include 'partials/checkoff-habit.html' %}
+                {% else %}
+                  {% include 'partials/streak-broken.html' %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            <div style="margin-top: auto;" class="d-flex justify-content-end align-items-center">
+              <div style="width: 100%;">
+                <hr />
+                <form method="POST" action="{% url 'delete-habit' habit.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-secondary" type="submit">Delete habit</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -65,8 +85,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                              <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
-                                                                                                                                                                                                                                                                                                                                                                                            `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `
       )
     }
     
@@ -74,8 +94,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                           <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
-                                                                                                                                                                                                                                                                                                                                                                                            `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `
       )
     }
     
@@ -83,8 +103,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                           <span>none</span>
-                                                                                                                                                                                                                                                                                                                                                                                            `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <span>none</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `
       )
     }
   </script>
