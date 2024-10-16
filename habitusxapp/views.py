@@ -8,7 +8,9 @@ from django.views import View
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseNotAllowed
 from django.db.models import Q
+from django.shortcuts import render
 
 
 class HabitsListView(LoginRequiredMixin, ListView):
@@ -151,5 +153,15 @@ class CheckoffCreateView(LoginRequiredMixin, View):
             date_added=timezone.now()
         )
 
-        messages.error(self.request, 'The habit was checked off successfully')
+        messages.success(self.request, 'The habit was checked off successfully')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+   
+def analytics_function_based_list_view(request):
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET']) 
+    
+    # TODO: add GET parameters filters
+    
+    habits = Habit.objects.all()
+
+    return render(request, 'analytics.html', {'habits': habits})

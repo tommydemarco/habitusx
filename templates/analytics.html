@@ -1,0 +1,42 @@
+{% extends 'base-logged.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-12">
+      <h1>Analytics</h1>
+      <p>Longest streaks table</p>
+    </div>
+    <div class="col-7">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Task name</th>
+            <th scope="col">Frequency</th>
+            <th scope="col">Streak</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Mark</td>
+            <td>Otto</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Mark</td>
+            <td>Thornton</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td>Mark</td>
+            <td>Larry</td>
+            <td>the Bird</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
