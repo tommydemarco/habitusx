@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
-from datetime import timedelta
+from datetime import timedelta, date
 from .models import Habit, CheckOff
 from django.views import View
 from django.http import HttpResponseRedirect
@@ -11,6 +11,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseNotAllowed
 from django.db.models import Q
 from django.shortcuts import render
+
+def get_week_monday(d):
+    return d - timedelta(days=d.weekday())
 
 
 class HabitsListView(LoginRequiredMixin, ListView):
@@ -25,9 +28,11 @@ class HabitsListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             today = timezone.now().date()
-            monday = today - timedelta(days=today.weekday())
+            yesterday = today - timedelta(days=1)
+            last_monday = today - timedelta(days=today.weekday())
             two_mondays_ago = today - timedelta(days=today.weekday() + 7)
-            context["monday"] = monday
+            context["yesterday"] = yesterday
+            context["last_monday"] = last_monday
             context["two_mondays_ago"] = two_mondays_ago
             for habit in context['habits']:
                 latest_checkoff = habit.checkoffs.order_by('-date_added').first()
@@ -107,9 +112,11 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             today = timezone.now().date()
-            monday = today - timedelta(days=today.weekday())
+            last_monday = today - timedelta(days=today.weekday())
             two_mondays_ago = today - timedelta(days=today.weekday() + 7)
-            context["monday"] = monday
+            yesterday = today - timedelta(days=1)
+            context["yesterday"] = yesterday
+            context["last_monday"] = last_monday
             context["two_mondays_ago"] = two_mondays_ago
             for habit in context['habits']:
                 latest_checkoff = habit.checkoffs.order_by('-date_added').first()
@@ -160,8 +167,78 @@ def analytics_function_based_list_view(request):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET']) 
     
-    # TODO: add GET parameters filters
+    sort_order = request.GET.get('sort', 'asc')
     
-    habits = Habit.objects.all()
+    today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
 
-    return render(request, 'analytics.html', {'habits': habits})
+    habits = Habit.objects.all()
+    habits_list = []
+
+    for habit in habits:
+        checkoffs = CheckOff.objects.filter(habit=habit).order_by('date_added')
+        
+        consecutive_count = 0
+        is_streak_active = False
+        
+        if checkoffs.exists() and habit.occurrence.daily_rate == 1:
+            consecutive_count = 1 
+            last_date = checkoffs.first().date_added  
+            
+            for checkoff in checkoffs[1:]:
+                if checkoff.date_added.date() == last_date.date() + timedelta(days=1):
+                    consecutive_count += 1
+                    last_date = checkoff.date_added
+                else:
+                    break
+                
+            most_recent_date = checkoffs.last().date_added
+            
+            if most_recent_date.date() == yesterday or most_recent_date.date() == today:
+                is_streak_active = True
+
+        elif checkoffs.exists() and habit.occurrence.daily_rate == 7:    
+            consecutive_count = 1
+            current_week_monday = get_week_monday(date.today())
+            last_week_monday = current_week_monday - timedelta(weeks=1)
+            last_week_monday_checkoff = get_week_monday(checkoffs.first().date_added)
+
+            for checkoff in checkoffs[1:]:
+                current_week_monday_checkoff = get_week_monday(checkoff.date_added)
+                if current_week_monday_checkoff.date() == last_week_monday_checkoff.date() + timedelta(weeks=1):
+                    consecutive_count += 1
+                    last_week_monday_checkoff = current_week_monday_checkoff
+                else:
+                    break
+
+            most_recent_date = checkoffs.last().date_added
+            most_recent_monday = get_week_monday(most_recent_date)
+
+            if most_recent_monday.date() == current_week_monday or most_recent_monday.date() == last_week_monday:
+                is_streak_active = True
+        
+        habits_list.append({
+            "habit": habit,
+            "last_date": last_date,
+            "consecutive_count": consecutive_count,
+            "is_streak_active": is_streak_active, 
+        })
+
+    if sort_order == "asc":
+        habits_list = sorted(habits_list, key=lambda x: x["consecutive_count"])
+    elif sort_order == "desc":
+        habits_list = sorted(habits_list, key=lambda x: x["consecutive_count"], reverse=True)
+
+    longest_streak_habits = []
+    if not habits_list:
+        longest_streak_habits = []
+    else: 
+        highest_count = max(habit["consecutive_count"] for habit in habits_list)
+        longest_streak_habits = [habit for habit in habits_list if habit["consecutive_count"] == highest_count]
+
+    context = {
+        "habits_list": habits_list,
+        "longest_streak_habits": longest_streak_habits
+    }
+
+    return render(request, 'analytics.html', context)

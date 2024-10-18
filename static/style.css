@@ -18,3 +18,7 @@
     font-size: 14px !important;
     line-height: 1.2 !important;
 }
+
+div.form-group {
+    margin-bottom: 20px;
+}
