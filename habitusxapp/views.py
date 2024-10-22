@@ -218,12 +218,12 @@ def analytics_function_based_list_view(request):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET']) 
     
-    sort_order = request.GET.get('sort', 'asc')
+    sort_order = request.GET.get('sort')
     
     today = timezone.now().date()
     yesterday = today - timedelta(days=1)
 
-    habits = Habit.objects.all()
+    habits = Habit.objects.filter(user=request.user).order_by('date_created')
     habits_list = []
 
     for habit in habits:
