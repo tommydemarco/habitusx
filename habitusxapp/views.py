@@ -12,11 +12,18 @@ from django.http import HttpResponseNotAllowed
 from django.db.models import Q
 from django.shortcuts import render
 
-def get_week_monday(d):
-    return d - timedelta(days=d.weekday())
+def get_week_monday_from_day(day):
+    """
+    A utility function that returns the monday of the week in which parameter day belongs to
+    """
+    return day - timedelta(days=day.weekday())
 
 
 class HabitsListView(LoginRequiredMixin, ListView):
+    """
+    Displays a list of habit belonging to the user that requested the page, orered by the date in which they were created
+    """
+    
     model = Habit
     template_name = "habit-list.html"
     context_object_name = "habits"
@@ -39,12 +46,21 @@ class HabitsListView(LoginRequiredMixin, ListView):
                 habit.latest_checkoff = latest_checkoff 
             return context
 
+
 class FilteredHabitListView(LoginRequiredMixin, ListView):
+    """
+    Displays a list of habit belonging to the user that requested the page, filtered by occurrence and checked-off status
+    """
+    
     model = Habit
     template_name = "habit-list.html"
     context_object_name = "habits"
 
     def get_queryset(self):
+        """
+        Returns a list of habits filtered by occurrence and checked-off status based on the value of get parameters
+        """
+        
         today = timezone.now().date()
         yesterday = today - timedelta(days=1)
         day_before_yesterday = yesterday - timedelta(days=1)
@@ -110,21 +126,32 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
         else: raise Http404(checked_off_status)
 
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            today = timezone.now().date()
-            last_monday = today - timedelta(days=today.weekday())
-            two_mondays_ago = today - timedelta(days=today.weekday() + 7)
-            yesterday = today - timedelta(days=1)
-            context["yesterday"] = yesterday
-            context["last_monday"] = last_monday
-            context["two_mondays_ago"] = two_mondays_ago
-            for habit in context['habits']:
-                latest_checkoff = habit.checkoffs.order_by('-date_added').first()
-                habit.latest_checkoff = latest_checkoff 
-            return context
+        """
+        Enriches the contexts with variables that are useful to display elements in the view, 
+        such as the values of yesyerday, last_monday, and two_mondays_ago
+        """
+        
+        context = super().get_context_data(**kwargs)
+        today = timezone.now().date()
+        last_monday = today - timedelta(days=today.weekday())
+        two_mondays_ago = today - timedelta(days=today.weekday() + 7)
+        yesterday = today - timedelta(days=1)
+        context["yesterday"] = yesterday
+        context["last_monday"] = last_monday
+        context["two_mondays_ago"] = two_mondays_ago
+        for habit in context['habits']:
+            latest_checkoff = habit.checkoffs.order_by('-date_added').first()
+            habit.latest_checkoff = latest_checkoff 
+        return context
 
 
 class HabitCreateView(LoginRequiredMixin, CreateView):
+    """
+    Creates a habit with description and occurrence values coming from the POST request, and assigns the
+    user associated to the habit as the user that performed the request. 
+    On success, it redirects to the home page and shows a success message to the user
+    """
+    
     model = Habit
     template_name = "add-new-habit.html"
     fields = ['description', 'occurrence']
@@ -136,8 +163,14 @@ class HabitCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         messages.success(self.request, 'Nice! You created a new habit')
         return super().form_valid(form)
+
     
 class HabitDeleteView(LoginRequiredMixin, View):
+    """
+    Deletes a habit if a habit with the requested primary key belonging to the user that requested the deletion is found.
+    On success, it redirects to the home page and shows a success message to the user
+    """
+    
     def post(self, request, pk):
         habit = get_object_or_404(Habit, pk=pk)
         
@@ -146,9 +179,16 @@ class HabitDeleteView(LoginRequiredMixin, View):
 
         messages.success(self.request, 'The habit was successfully deleted')
         return redirect('/') 
-    
+
+       
 class CheckoffCreateView(LoginRequiredMixin, View):
-   def post(self, request, pk):
+    """
+    Creates a CheckOff entity associated to the habit that matches the primary key passed in the POST request.
+    On success, it shows a success message to the user
+    On error, it redirects to the home page and shows an error message to the user
+    """
+    
+    def post(self, request, pk):
         habit = get_object_or_404(Habit, pk=pk)
 
         if not habit:
@@ -162,8 +202,19 @@ class CheckoffCreateView(LoginRequiredMixin, View):
 
         messages.success(self.request, 'The habit was checked off successfully')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
    
 def analytics_function_based_list_view(request):
+    """
+    It returns a collection of habits which are enriched with the following information:
+        - The last date in which they were checked off
+        - The maximum number of consecutive checkoffs (streak), according to the specific habit's occurrence (daily or weekly)
+        - If their maximum streak of checkoffs is currently active or has been broken
+
+    In addition, the context provided to the view by this function also includes a collection of habits with the
+    longest streak among all tracked habits
+    """
+    
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET']) 
     
@@ -199,12 +250,12 @@ def analytics_function_based_list_view(request):
 
         elif checkoffs.exists() and habit.occurrence.daily_rate == 7:    
             consecutive_count = 1
-            current_week_monday = get_week_monday(date.today())
+            current_week_monday = get_week_monday_from_day(date.today())
             last_week_monday = current_week_monday - timedelta(weeks=1)
-            last_week_monday_checkoff = get_week_monday(checkoffs.first().date_added)
+            last_week_monday_checkoff = get_week_monday_from_day(checkoffs.first().date_added)
 
             for checkoff in checkoffs[1:]:
-                current_week_monday_checkoff = get_week_monday(checkoff.date_added)
+                current_week_monday_checkoff = get_week_monday_from_day(checkoff.date_added)
                 if current_week_monday_checkoff.date() == last_week_monday_checkoff.date() + timedelta(weeks=1):
                     consecutive_count += 1
                     last_week_monday_checkoff = current_week_monday_checkoff
@@ -212,7 +263,7 @@ def analytics_function_based_list_view(request):
                     break
 
             most_recent_date = checkoffs.last().date_added
-            most_recent_monday = get_week_monday(most_recent_date)
+            most_recent_monday = get_week_monday_from_day(most_recent_date)
 
             if most_recent_monday.date() == current_week_monday or most_recent_monday.date() == last_week_monday:
                 is_streak_active = True

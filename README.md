@@ -8,7 +8,7 @@ In order to track habits, the project manages 4 domain entities, which have the 
 
 ![UML Class Diagram of the application's entities](./entities-uml-class-diagram.png)
 
-## Local Setup and installation
+## Local Setup, installation and run instructions
 
 ### 1 - Clone the repository
 
@@ -39,7 +39,7 @@ In addition, the database (SQLite) in its integrity has been committed to the re
 
 ### 4 - Run the development server
 
-Once the virtual environment is active and all depencdencies listed in the requirements file have been installed, the Django server can be started and the applicagtion can be opened in the browser.
+Once the virtual environment is active and all depencdencies listed in the requirements file have been installed, the Django server can be started and the application can be opened in the browser.
 
 To start the server run the command:
 
