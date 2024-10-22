@@ -1,0 +1,74 @@
+{% extends 'base-logged.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-12">
+      <h1>Analytics</h1>
+      <p>Longest streaks table</p>
+    </div>
+    <div class="col-xl-8">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Habit name</th>
+            <th scope="col">Occurrence</th>
+            <th scope="col">
+              Longest Streak <a style="text-decoration: none; margin-left: 20px;" href="?sort=desc">&#11032; asc</a> <a style="text-decoration: none; margin-left: 10px;" href="?sort=asc">&#11033; desc</a>
+            </th>
+            <th scope="col">Is streak active?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for enriched_habit in habits_list %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td>{{ enriched_habit.habit.description }}</td>
+
+              <td>{{ enriched_habit.habit.occurrence.description }}</td>
+              <td>{{ enriched_habit.consecutive_count }}</td>
+              <td>
+                {% if enriched_habit.is_streak_active %}
+                  <span class="badge bg-success">YES</span>
+                {% else %}
+                  <span class="badge bg-light text-dark">NO</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-xl-8">
+      <hr style="margin-top: 40px;" />
+      <h3>
+        &#127942;{% if longest_streak_habits|length == 1 %}
+          Habit with the longest streak
+        {% else %}
+          Habits with the longest streak
+        {% endif %}
+      </h3>
+      <p>
+        {% if longest_streak_habits|length == 1 %}
+          The habit with the longest streak is:
+        {% else %}
+          The habits with the longest streak are:
+        {% endif %}
+      </p>
+      <div class="row">
+        {% for longest_streak_habit in longest_streak_habits %}
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <b>{{ longest_streak_habit.habit.description }}</b> <span class="badge bg-secondary">{{ longest_streak_habit.habit.occurrence.description }}</span>
+              </div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">Max streak length: {{ longest_streak_habit.consecutive_count }}</li>
+              </ul>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

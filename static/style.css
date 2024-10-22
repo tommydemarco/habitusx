@@ -1,0 +1,24 @@
+.main-container {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 100vh;
+
+    >*:nth-child(2) {
+        flex: 1;
+    }
+}
+
+.footer-logout-button {
+    background: transparent;
+    outline: none;
+    border: 0;
+}
+
+.badge {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+}
+
+div.form-group {
+    margin-bottom: 20px;
+}

@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg py-3 bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}" style="color: white; font-size: 24px; font-weight: bold;">HabitusX</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        {% if not user.is_authenticated %}
+          <li class="nav-item">
+            <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'home' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'analytics' %}">Analytics</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary mx-2" aria-current="page" href="{% url 'add-new-habit' %}">Add new habit</a>
+          </li>
+          <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button class="btn btn-secondary" type="submit">Logout</button>
+            </form>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

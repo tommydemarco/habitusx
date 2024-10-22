@@ -1,0 +1,88 @@
+<div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Filter habits</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Habit occurrence</h6>
+        <div class="form-check">
+          <input class="form-check-input" value="any-occurrence" type="radio" name="occurrence" id="any-occurrence" />
+          <label class="form-check-label" for="any-occurrence">Any occurrence</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" value="daily" type="radio" name="occurrence" id="daily" />
+          <label class="form-check-label" for="daily">Daily</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" value="weekly" type="radio" name="occurrence" id="weekly" />
+          <label class="form-check-label" for="weekly">Weekly</label>
+        </div>
+        <hr />
+        <h6>Habit completion status</h6>
+        <div class="form-check">
+          <input class="form-check-input" value="any-status" type="radio" name="completion" id="any-status" />
+          <label class="form-check-label" for="any-status">Any status</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" value="checked" type="radio" name="completion" id="checked" />
+          <label class="form-check-label" for="checked">Checked</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" value="unchecked" type="radio" name="completion" id="unchecked" />
+          <label class="form-check-label" for="unchecked">Unchecked</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" value="streak-broken" type="radio" name="completion" id="streak-broken" />
+          <label class="form-check-label" for="streak-broken">Streak broken</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="applyFiltersButton" class="btn btn-primary">Apply filters</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const filtersModal = document.getElementById('filtersModal');
+    const applyFiltersButton = document.getElementById('applyFiltersButton');
+
+    function setCheckboxValues() {
+        const pathElements = window.location.pathname.split('/');
+        
+        const occurrenceElement = pathElements[2] || "any-occurrence";
+        const ststusElement = pathElements[3] || "any-status";
+        
+        const firstCheckboxSet = document.querySelectorAll('input[name="occurrence"]');
+        firstCheckboxSet.forEach(checkbox => {
+            checkbox.checked = (checkbox.value === occurrenceElement);
+        });
+
+        const secondCheckboxSet = document.querySelectorAll('input[name="completion"]');
+        secondCheckboxSet.forEach(checkbox => {
+            checkbox.checked = (checkbox.value === ststusElement);
+        });
+    }
+
+    function navigateBasedOnCheckboxes() {
+        const occurrenceValue = document.querySelector('input[name="occurrence"]:checked');
+        const completionValue = document.querySelector('input[name="completion"]:checked');
+        
+        const occurrence = occurrenceValue?.value || "any-occurrence";
+        const completion = completionValue?.value || "any-status";
+        
+        const filterPath = `filter/${occurrence}/${completion}/`;
+        window.location.pathname = filterPath;
+    }
+
+    filtersModal.addEventListener('shown.bs.modal', function () {
+        setCheckboxValues();
+    });
+
+    applyFiltersButton.addEventListener('click', function () {
+        navigateBasedOnCheckboxes();
+    });
+</script>

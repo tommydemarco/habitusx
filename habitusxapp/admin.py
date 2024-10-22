@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Habit, OccurrenceRate, CheckOff
 
-# Register your models here.
+admin.site.register(Habit)
+admin.site.register(OccurrenceRate)
+admin.site.register(CheckOff)

@@ -1,0 +1,109 @@
+{% extends 'base-logged.html' %}
+
+{% block content %}
+  <div class="col-6 pb-3">
+    <h1>Your habits</h1>
+  </div>
+  <div class="col-6 pb-3 d-flex flex-row justify-content-end align-items-center">
+    <span id="active-filters" style="padding-inline-end: 10px;">Active filters:</span>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">Open filter manager</button>
+  </div>
+  {% for habit in habits %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card" style="height: 100%">
+        <div class="card-body" style="display: flex; flex-direction: column;">
+          <h5 class="card-title">{{ habit.description }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Created on {{ habit.date_created }}</h6>
+          <p class="card-text">
+            Occurrence: <i>{{ habit.occurrence.description }}</i><br />
+          </p>
+          <hr style="margin-top: 0;" />
+          <!-- daily conditions -->
+          {% if habit.occurrence.daily_rate == 1 %}
+            {% if habit.latest_checkoff %}
+              {% if habit.latest_checkoff.date_added|date:'Y-m-d' == today %}
+                {% include 'partials/habit-checked.html' %}
+              {% elif habit.latest_checkoff.date_added|date:'Y-m-d' == yesterday|date:'Y-m-d' %}
+                {% include 'partials/checkoff-habit.html' %}
+              {% else %}
+                {% include 'partials/streak-broken.html' %}
+              {% endif %}
+            {% else %}
+              {% if habit.date_created|date:'Y-m-d' == today %}
+                {% include 'partials/checkoff-habit.html' %}
+              {% else %}
+                {% include 'partials/streak-broken.html' %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          <!-- weekly conditions -->
+          {% if habit.occurrence.daily_rate == 7 %}
+            {% if habit.latest_checkoff %}
+              {% if habit.latest_checkoff.date_added|date:'Y-m-d' >= last_monday|date:'Y-m-d' %}
+                {% include 'partials/habit-checked.html' %}
+              {% elif habit.latest_checkoff.date_added|date:'Y-m-d' >= two_mondays_ago|date:'Y-m-d' %}
+                {% include 'partials/checkoff-habit.html' %}
+              {% else %}
+                {% include 'partials/streak-broken.html' %}
+              {% endif %}
+            {% else %}
+              {% if habit.date_created|date:'Y-m-d' >= monday|date:'Y-m-d' %}
+                {% include 'partials/checkoff-habit.html' %}
+              {% else %}
+                {% include 'partials/streak-broken.html' %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          <div style="margin-top: auto;" class="d-flex justify-content-end align-items-center">
+            <div style="width: 100%;">
+              <hr />
+              <form method="POST" action="{% url 'delete-habit' habit.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-secondary" type="submit">Delete habit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  {% if habits|length == 0 %}
+    <div class="col-md-6">The list of habits is empty</div>
+  {% endif %}
+  {% include 'partials/filter-modal.html' %}
+
+  <script>
+    const filtersElement = document.getElementById('active-filters')
+    const pathElements = window.location.pathname.split('/')
+    
+    const occurrenceElement = pathElements[2]
+    const statusElement = pathElements[3]
+    
+    if (occurrenceElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+      )
+    }
+    
+    if (statusElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+      )
+    }
+    
+    if (!occurrenceElement && !statusElement) {
+      filtersElement.insertAdjacentHTML(
+        'beforeend',
+        `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <span>none</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+      )
+    }
+  </script>
+{% endblock %}

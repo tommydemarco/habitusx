@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-6">
+      <h1>Logout successful</h1>
+      <p class="text-secondary">Thanks for using the HabitusX application</p>
+      <a class="btn btn-primary mt-3" href="{% url 'login' %}">Login again</a>
+    </div>
+  </div>
+{% endblock %}
