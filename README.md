@@ -37,7 +37,7 @@ For example, the value of the Django SECRET_KEY and the value of the DEBUG const
 
 In addition, the database (SQLite) in its integrity has been committed to the repository along with the data it contains, and the instance is used when setting up and running the project locally.
 
-### 4 - Run the development server
+### 5 - Run the development server
 
 Once the virtual environment is active and all depencdencies listed in the requirements file have been installed, the Django server can be started and the application can be opened in the browser.
 
@@ -46,6 +46,13 @@ To start the server run the command:
 `python manage.py runserver`
 
 As default, the server will run at http://127.0.0.1:8000. You can visit this URL in your browser to access the app.
+
+### 5 - Log in and navigate around
+
+In order to test the application locally, you can use the following credentials:
+
+username: tom
+password: the course's short code
 
 ## Running tests
 
