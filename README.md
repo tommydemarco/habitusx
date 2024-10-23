@@ -47,12 +47,12 @@ To start the server run the command:
 
 As default, the server will run at http://127.0.0.1:8000. You can visit this URL in your browser to access the app.
 
-### 5 - Log in and navigate around
+### 6 - Log in and navigate around
 
 In order to test the application locally, you can use the following credentials:
 
-username: tom
-password: the course's short code
+- username: tom
+- password: the course's short code
 
 ## Running tests
 
