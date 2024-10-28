@@ -38,4 +38,7 @@ class CheckOff(models.Model):
     
     habit = models.ForeignKey(Habit, related_name="checkoffs", on_delete=models.CASCADE)
     date_added = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return 'Habit %s (%s) checkoff date %s' % (self.habit.id, self.habit.occurrence.description, self.date_added.strftime("%d-%m-%Y"))
     
