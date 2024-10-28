@@ -22,3 +22,11 @@
 div.form-group {
     margin-bottom: 20px;
 }
+
+#habits-table.daily tr.weekly {
+    display: none;
+}
+
+#habits-table.weekly tr.daily {
+    display: none;
+}
