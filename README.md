@@ -32,7 +32,7 @@ Once you have created and activate the virtual emnvironment, install the depende
 
 This project was created for learning purposes, and it is not meant to be deployed.
 
-Thesefore, all variables that would normally be set as environment variables are simply hardcoded in the code.
+Therefore, all variables that would normally be set as environment variables are simply hardcoded in the code.
 For example, the value of the Django SECRET_KEY and the value of the DEBUG constant.
 
 In addition, the database (SQLite) in its integrity has been committed to the repository along with the data it contains, and the instance is used when setting up and running the project locally.
