@@ -6,22 +6,41 @@
       <h1>Analytics</h1>
       <p>Longest streaks table</p>
     </div>
-    <div class="col-xl-8">
-      <table class="table">
+    <div class="col-12 mb-4">
+      <div class="mb-2">
+        <b>Filter per occurrence</b>
+      </div>
+      <div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="occurrenceFilter" id="all" value="all" checked />
+          <label class="form-check-label" for="all">All occurrences</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="occurrenceFilter" id="daily" value="daily" />
+          <label class="form-check-label" for="daily">Daily</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="occurrenceFilter" id="weekly" value="weekly" />
+          <label class="form-check-label" for="weekly">Weekly</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-12">
+      <table id="habits-table" class="table">
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Habit name</th>
-            <th scope="col">Occurrence</th>
-            <th scope="col">
+            <th width="10%" scope="col">#</th>
+            <th width="30%" scope="col">Habit name</th>
+            <th width="20%" scope="col">Occurrence</th>
+            <th width="30%" scope="col">
               Longest Streak <a style="text-decoration: none; margin-left: 20px;" href="?sort=desc">&#11032; asc</a> <a style="text-decoration: none; margin-left: 10px;" href="?sort=asc">&#11033; desc</a>
             </th>
-            <th scope="col">Is streak active?</th>
+            <th width="10%" scope="col">Is streak active?</th>
           </tr>
         </thead>
         <tbody>
           {% for enriched_habit in habits_list %}
-            <tr>
+            <tr class="{{ enriched_habit.habit.occurrence.description|lower }}">
               <th scope="row">{{ forloop.counter }}</th>
               <td>{{ enriched_habit.habit.description }}</td>
 
@@ -39,7 +58,7 @@
         </tbody>
       </table>
     </div>
-    <div class="col-xl-8">
+    <div class="col-xl-12">
       <hr style="margin-top: 40px;" />
       <h3>
         &#127942;{% if longest_streak_habits|length == 1 %}
@@ -57,7 +76,7 @@
       </p>
       <div class="row">
         {% for longest_streak_habit in longest_streak_habits %}
-          <div class="col-md-6">
+          <div class="col-md-6 col-lg-4">
             <div class="card">
               <div class="card-header d-flex justify-content-between">
                 <b>{{ longest_streak_habit.habit.description }}</b> <span class="badge bg-secondary">{{ longest_streak_habit.habit.occurrence.description }}</span>
@@ -70,5 +89,41 @@
         {% endfor %}
       </div>
     </div>
+    <script>
+      const tableElement = document.getElementById('habits-table')
+      
+      document.querySelectorAll("input[name='occurrenceFilter']").forEach((radio) => {
+        radio.addEventListener('change', function () {
+          const allValue = 'all'
+          const weeklyValue = 'weekly'
+          const dailyValue = 'daily'
+          tableElement.classList.remove(allValue, weeklyValue, dailyValue)
+      
+          if (this.checked) {
+            localStorage.setItem('analytics-habit-occurrence', this.value)
+      
+            switch (this.value) {
+              case allValue:
+                break
+              case weeklyValue:
+                tableElement.classList.add(weeklyValue)
+                break
+              case dailyValue:
+                tableElement.classList.add(dailyValue)
+                break
+              default:
+                break
+            }
+          }
+        })
+      })
+      
+      const savedValue = localStorage.getItem('analytics-habit-occurrence')
+      if (savedValue) {
+        tableElement.classList.add(savedValue)
+        const radioElement = document.querySelector(`input[name='occurrenceFilter'][value='${savedValue}']`)
+        if (radioElement) radioElement.click()
+      }
+    </script>
   </div>
 {% endblock %}

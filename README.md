@@ -59,3 +59,12 @@ In order to test the application locally, you can use the following credentials:
 In order to run tests, execute the following command
 
 `python manage.py test`
+
+The tests are located in the following file:
+
+`habitusxapp/tests.py`
+
+## Other remarks
+
+Some variables and functions are named using camel casing due to the developer's JavaScript background.
+Apologies.

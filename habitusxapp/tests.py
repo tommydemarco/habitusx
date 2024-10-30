@@ -25,9 +25,8 @@ class BaseTestSetup(TestCase):
 
         # ======= setup checkoffs
         # ========================= john
-        CheckOff.objects.create(habit=self.habit1John, date_added=date(2024, 9, 15))
-        CheckOff.objects.create(habit=self.habit1John, date_added=date(2024, 9, 16))
-        CheckOff.objects.create(habit=self.habit1John, date_added=date(2024, 9, 17))
+        for value in range(1, 31):  
+            CheckOff.objects.create(habit=self.habit1John, date_added=date(2024, 9, value))
 
         CheckOff.objects.create(habit=self.habit2John, date_added=date(2024, 9, 17))
         CheckOff.objects.create(habit=self.habit2John, date_added=date(2024, 9, 24))
@@ -66,7 +65,7 @@ class AnalyticsViewTest(BaseTestSetup):
         self.assertEqual(len(habits_list), 3)
         
         self.assertEqual(habits_list[0]["habit"].description, "John Habit 1")
-        self.assertEqual(habits_list[0]["consecutive_count"], 3)
+        self.assertEqual(habits_list[0]["consecutive_count"], 30)
         self.assertEqual(habits_list[0]["is_streak_active"], False)
 
         self.assertEqual(habits_list[1]["habit"].description, "John Habit 2")
@@ -139,11 +138,11 @@ class HabitCheckoffViewTest(BaseTestSetup):
 
     def test_habit_checkoff_view(self):
         
-        self.assertEqual(CheckOff.objects.count(), 14) 
+        self.assertEqual(CheckOff.objects.count(), 41) 
         
         self.client.login(username="John", password="password1")
         habit_to_checkoff_id = Habit.objects.filter(user=self.user1).first().id
         response = self.client.post(reverse("checkoff-habit", kwargs={"pk": habit_to_checkoff_id}))
         
         self.assertEqual(response.status_code, 302) 
-        self.assertEqual(CheckOff.objects.count(), 15)
+        self.assertEqual(CheckOff.objects.count(), 42)
