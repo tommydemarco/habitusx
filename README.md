@@ -66,5 +66,5 @@ The tests are located in the following file:
 
 ## Other remarks
 
-Some variables and functions are named using pascal casing due to the developer's JavaScript background.
+Some variables and functions are named using camel casing due to the developer's JavaScript background.
 Apologies.
