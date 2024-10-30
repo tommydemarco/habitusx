@@ -63,3 +63,8 @@ In order to run tests, execute the following command
 The tests are located in the following file:
 
 `habitusxapp/tests.py`
+
+## Other remarks
+
+Some variables and functions are named using pascal casing due to the developer's JavaScript background.
+Apologies.
