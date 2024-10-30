@@ -44,34 +44,6 @@ class BaseTestSetup(TestCase):
         CheckOff.objects.create(habit=self.habit2Jane, date_added=date(2024, 9, 17))
         CheckOff.objects.create(habit=self.habit2Jane, date_added=date(2024, 9, 25))
 
-
-class AnalyticsViewTest(BaseTestSetup):
-
-    def test_analytics_view_status_code(self):
-        self.client.login(username="John", password="password1")
-        response = self.client.get(reverse("analytics"))
-        self.assertEqual(response.status_code, 200)
-        
-    def test_analytics_view_template_used(self):
-        self.client.login(username="John", password="password1")
-        response = self.client.get(reverse("analytics"))
-        self.assertTemplateUsed(response, "analytics.html")
-
-    def test_analytics_view_context(self):
-        self.client.login(username="John", password="password1")
-        response = self.client.get(reverse("analytics"))
-        habits_list = response.context["habits_list"]
-        
-        self.assertEqual(len(habits_list), 3)
-        
-        self.assertEqual(habits_list[0]["habit"].description, "John Habit 1")
-        self.assertEqual(habits_list[0]["consecutive_count"], 30)
-        self.assertEqual(habits_list[0]["is_streak_active"], False)
-
-        self.assertEqual(habits_list[1]["habit"].description, "John Habit 2")
-        self.assertEqual(habits_list[1]["consecutive_count"], 2)
-        self.assertEqual(habits_list[1]["is_streak_active"], False)
-
         
 class HomeViewTest(BaseTestSetup):
 
@@ -146,3 +118,43 @@ class HabitCheckoffViewTest(BaseTestSetup):
         
         self.assertEqual(response.status_code, 302) 
         self.assertEqual(CheckOff.objects.count(), 42)
+
+class AnalyticsViewTest(BaseTestSetup):
+
+    def test_analytics_view_status_code(self):
+        self.client.login(username="John", password="password1")
+        response = self.client.get(reverse("analytics"))
+        self.assertEqual(response.status_code, 200)
+        
+    def test_analytics_view_template_used(self):
+        self.client.login(username="John", password="password1")
+        response = self.client.get(reverse("analytics"))
+        self.assertTemplateUsed(response, "analytics.html")
+
+    def test_analytics_view_context(self):
+        self.client.login(username="John", password="password1")
+        response = self.client.get(reverse("analytics"))
+        habits_list = response.context["habits_list"]
+        
+        self.assertEqual(len(habits_list), 3)
+        
+        self.assertEqual(habits_list[0]["habit"].description, "John Habit 1")
+        self.assertEqual(habits_list[0]["consecutive_count"], 30)
+        self.assertEqual(habits_list[0]["is_streak_active"], False)
+
+        self.assertEqual(habits_list[1]["habit"].description, "John Habit 2")
+        self.assertEqual(habits_list[1]["consecutive_count"], 2)
+        self.assertEqual(habits_list[1]["is_streak_active"], False)
+
+    def test_analytics_view_context_longest_streak(self):
+        self.client.login(username="John", password="password1")
+        response = self.client.get(reverse("analytics"))
+        longest_streak_habit_list = response.context["longest_streak_habits"]
+        
+        self.assertEqual(len(longest_streak_habit_list), 1)
+        
+        self.assertEqual(longest_streak_habit_list[0]["habit"].description, "John Habit 1")
+        self.assertEqual(longest_streak_habit_list[0]["consecutive_count"], 30)
+        self.assertEqual(longest_streak_habit_list[0]["is_streak_active"], False)
+
+    # the analytics functionality that filters per occurrence is implemented with JavaScript in the template
