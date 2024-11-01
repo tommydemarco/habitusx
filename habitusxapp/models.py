@@ -13,7 +13,7 @@ class OccurrenceRate(models.Model):
     daily_rate = models.IntegerField()
 
     def __str__(self):
-            return '%s' % (self.description)
+        return '%s' % (self.description)
 
 
 class Habit(models.Model):
@@ -28,6 +28,9 @@ class Habit(models.Model):
     occurrence = models.ForeignKey(OccurrenceRate, related_name="occurrence", on_delete=models.CASCADE)
     date_created = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return '%s' % (self.description)
+
 
 class CheckOff(models.Model):
     """
@@ -40,5 +43,5 @@ class CheckOff(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return 'Habit %s (%s) checkoff date %s' % (self.habit.id, self.habit.occurrence.description, self.date_added.strftime("%d-%m-%Y"))
+        return 'Habit %s (%s) (%s) checkoff date %s' % (self.habit.id,self.habit.description, self.habit.occurrence.description, self.date_added.strftime("%d-%m-%Y"))
     
