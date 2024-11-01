@@ -66,8 +66,8 @@ The tests are located in the following file:
 
 ## About the habits checkoff and streak logic
 
-Newly created habits need to be checked off in their current occurrence period for the streak not be show as broken at the start of a new occurrence period. For example, if I create a daily habit today but I do not check it off, tomorrow it will show as a habit with a broken streak. So if I create a daily habit, I have to check it off also on the creation date to get started with my habit streak.
-The same logic also translates to weekly habits.
+Newly created habits need to be checked off in their current occurrence period for the streak not be shown as broken at the start of a new occurrence period. For example, if I create a daily habit today but I do not check it off, tomorrow it will show as a habit with a broken streak. So if I create a daily habit, I have to check it off also on the creation date to get started with my habit streak.
+The same logic also transfers to weekly habits.
 
 ## Known limitations
 
