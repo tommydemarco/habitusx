@@ -43,5 +43,5 @@ class CheckOff(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return 'Habit %s (%s) checkoff date %s' % (self.habit.id, self.habit.occurrence.description, self.date_added.strftime("%d-%m-%Y"))
+        return 'Habit %s (%s) (%s) checkoff date %s' % (self.habit.id,self.habit.description, self.habit.occurrence.description, self.date_added.strftime("%d-%m-%Y"))
     

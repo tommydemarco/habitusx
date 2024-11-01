@@ -64,6 +64,22 @@ The tests are located in the following file:
 
 `habitusxapp/tests.py`
 
+## About the habits checkoff and streak logic
+
+Newly created habits need to be checked off in their current occurrence period for the streak not be show as broken at the start of a new occurrence period. For example, if I create a daily habit today but I do not check it off, tomorrow it will show as a habit with a broken streak. So if I create a daily habit, I have to check it off also on the creation date to get started with my habit streak.
+The same logic also translates to weekly habits.
+
+## Known limitations
+
+For the moment, while awaiting further clarifications, all the habit creation date logic and completion logic is based on UTC time.
+
+#### Example of the implications
+
+Let us assume that I am in Rome and the current date is the 11th of November. Hence, Central European Time (CET) applies. 
+If I have completed a daily task today, I will have to wait until 1:00 AM of the next day to be able to mark it as completed again.
+This is because the new day, according to UTC time, will start at 1:00 AM in Rome, instead of at 0:00 AM.
+
+
 ## Other remarks
 
 Some variables and functions are named using camel casing due to the developer's JavaScript background.

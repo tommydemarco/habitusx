@@ -13,7 +13,7 @@
       <div class="card" style="height: 100%">
         <div class="card-body" style="display: flex; flex-direction: column;">
           <h5 class="card-title">{{ habit.description }}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">Created on {{ habit.date_created }}</h6>
+          <h6 class="card-subtitle mb-2 text-muted">Created on {{ habit.date_created }} (UTC time)</h6>
           <p class="card-text">
             Occurrence: <i>{{ habit.occurrence.description }}</i><br />
           </p>
@@ -47,7 +47,7 @@
                 {% include 'partials/streak-broken.html' %}
               {% endif %}
             {% else %}
-              {% if habit.date_created|date:'Y-m-d' >= monday|date:'Y-m-d' %}
+              {% if habit.date_created|date:'Y-m-d' >= last_monday|date:'Y-m-d' %}
                 {% include 'partials/checkoff-habit.html' %}
               {% else %}
                 {% include 'partials/streak-broken.html' %}
@@ -83,8 +83,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <span class="badge bg-secondary">${occurrenceElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `
       )
     }
     
@@ -92,8 +92,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <span class="badge bg-secondary">${statusElement.replace('-', ' ')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `
       )
     }
     
@@ -101,8 +101,8 @@
       filtersElement.insertAdjacentHTML(
         'beforeend',
         `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <span>none</span>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <span>none</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `
       )
     }
   </script>
