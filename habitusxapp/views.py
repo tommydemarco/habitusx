@@ -108,21 +108,28 @@ class FilteredHabitListView(LoginRequiredMixin, ListView):
             habits_any_status = weekly_habits
         elif occurrence == "any-occurrence": 
             habits_checked = daily_habits.filter(
-                Q(checkoffs__date_added__gt=today),
+                Q(checkoffs__date_added__date__gte=today),
             ).distinct() | weekly_habits.filter(
-                checkoffs__date_added__range=(monday, today), 
+                checkoffs__date_added__range=(monday, tomorrow)
             ).distinct()
-            habits_unchecked = daily_habits.filter(
+            habits_unchecked = weekly_habits.annotate(
+                max_date_added=Max('checkoffs__date_added')
+            ).filter(
+                ((Q(date_created__gte=monday) & Q(checkoffs__isnull=True))) |
+                (Q(max_date_added__gte=two_mondays_ago) & Q(max_date_added__lt=monday))
+            ).distinct() | daily_habits.filter(
                 (Q(date_created__date=today) & Q(checkoffs__isnull=True)) |
-                Q(checkoffs__date_added__lt=day_before_yesterday)
-            ).distinct() | weekly_habits.filter(
-                ((Q(date_created__date__gte=monday) & Q(checkoffs__isnull=True))) |
-                (Q(checkoffs__date_added__lte=two_mondays_ago) & ~Q(checkoffs__date_added__range=(monday, today)))
+                (Q(checkoffs__date_added__gte=yesterday) & ~Q(checkoffs__date_added__gte=today))
             ).distinct()
-            habits_broken = daily_habits.filter(
-                checkoffs__date_added__lt=yesterday, 
-            ).distinct() | weekly_habits.filter(
-                Q(checkoffs__date_added__lt=monday)
+            habits_broken = daily_habits.annotate(
+                max_date_added=Max('checkoffs__date_added')
+            ).filter(
+                Q(max_date_added__lt=yesterday) | 
+                Q(max_date_added__isnull=True, date_created__lt=today)).distinct() | weekly_habits.annotate(
+                max_date_added=Max('checkoffs__date_added')
+            ).filter(
+                Q(max_date_added__lt=two_mondays_ago) |
+                Q(max_date_added__isnull=True, date_created__range=(two_mondays_ago, monday))
             ).distinct()
             habits_any_status = daily_habits | weekly_habits
         else: raise Http404('Occurrence 404')
