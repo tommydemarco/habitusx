@@ -54,6 +54,10 @@ In order to test the application locally, you can use the following credentials:
 - username: tom
 - password: the course's short code
 
+## Usage
+
+For usage instructions please refer to the power point presentation that can be found in the project's knowledge base platform.
+
 ## Running tests
 
 In order to run tests, execute the following command
